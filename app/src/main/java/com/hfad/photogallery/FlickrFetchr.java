@@ -21,7 +21,9 @@ import java.util.List;
  */
 public class FlickrFetchr {
     private static final String TAG = "FlickrFetchr";
-    private static final String API_KEY = "f61685dc3f282d6dec9b929f9aff43c4";
+    private static final String API_KEY = "6a0d1973ce0751f2cb32813281ac3b21";
+    //private static final String API_SECRET = "REPLACE_ME_WITH_A_REAL_KEY";
+
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
     private static final Uri ENDPOINT = Uri
@@ -40,7 +42,9 @@ public class FlickrFetchr {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             InputStream in = connection.getInputStream();
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new IOException(connection.getResponseMessage() + ": with " + urlSpec);
+                throw new IOException(connection.getResponseMessage() +
+                        ": with " +
+                        urlSpec);
             }
             int bytesRead = 0;
             byte[] buffer = new byte[1024];
@@ -54,7 +58,7 @@ public class FlickrFetchr {
         }
     }
 
-    String getUrlString(String urlSpec) throws IOException {
+    public String getUrlString(String urlSpec) throws IOException {
         return new String(getUrlBytes(urlSpec));
     }
 
@@ -114,6 +118,7 @@ public class FlickrFetchr {
             }
 
             item.setUrl(photoJsonObject.getString("url_s"));
+            item.setCaption(photoJsonObject.getString("owner"));
             items.add(item);
         }
     }

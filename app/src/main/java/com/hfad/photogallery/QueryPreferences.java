@@ -12,7 +12,8 @@ public class QueryPreferences {
     private static final String PREF_LAST_RESULT_ID = "lastResultId";
 
     public static String getStoredQuery(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_SEARCH_QUERY, null);
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(PREF_SEARCH_QUERY, null);
     }
 
     public static void setStoredQuery(Context context, String query) {
