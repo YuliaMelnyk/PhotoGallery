@@ -1,5 +1,6 @@
 package com.hfad.photogallery;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -28,7 +29,7 @@ import java.util.List;
  * @author yuliiamelnyk on 18/08/2020
  * @project PhotoGallery
  */
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
 
     private static final String TAG = "PhotoGalleryFragment";
 
@@ -52,12 +53,9 @@ public class PhotoGalleryFragment extends Fragment {
         Handler responseHandler = new Handler();
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
         mThumbnailDownloader.setThumbnailDownloadListener(
-                new ThumbnailDownloader.ThumbnailDownloadListener<PhotoHolder>() {
-                    @Override
-                    public void onThumbnailDownloaded(PhotoHolder photoHolder, Bitmap bitmap) {
-                        Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-                        photoHolder.bindDrawable(drawable);
-                    }
+                (photoHolder, bitmap) -> {
+                    Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                    photoHolder.bindDrawable(drawable);
                 }
         );
         mThumbnailDownloader.start();
@@ -65,17 +63,6 @@ public class PhotoGalleryFragment extends Fragment {
         Log.i(TAG, "Background thread started");
     }
 
-    private void turnOnStrictMode() {
-        if (BuildConfig.DEBUG) {
-            StrictMode.setThreadPolicy(
-                    new StrictMode.ThreadPolicy.Builder().detectAll()
-                            .penaltyLog().penaltyDeath().build());
-            StrictMode.setVmPolicy(
-                    new StrictMode.VmPolicy.Builder().detectAll()
-                            .penaltyLog().penaltyDeath().build()
-            );
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

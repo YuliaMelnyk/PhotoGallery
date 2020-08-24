@@ -1,5 +1,6 @@
 package com.hfad.photogallery;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -14,7 +15,9 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import java.lang.reflect.AccessibleObject;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yuliiamelnyk on 20/08/2020
@@ -23,7 +26,14 @@ import java.util.List;
 public class PollService extends IntentService {
     private static final String TAG = "PollService";
 
+    public static final long POLL_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
+
     public static final long POLL_INTERVAL = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+
+    public static final String ACTION_SHOW_NOTIFICATION = "com.hfad.photogallery.SHOW_NOTIFICATION";
+    public static final String PERM_PRIVATE = "com.hfad.photogallery.PRIVATE";
+    public static final String REQUEST_CODE = "REQUEST_CODE";
+    public static final String NOTIFICATION = "NOTIFICATION";
 
     public static Intent newIntent(Context context) {
         return new Intent(context, PollService.class);
@@ -32,20 +42,25 @@ public class PollService extends IntentService {
     public static void setServiceAlarm(Context context, boolean isOn) {
         Intent i = PollService.newIntent(context);
         PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager)
+                context.getSystemService(Context.ALARM_SERVICE);
 
         if (isOn) {
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), POLL_INTERVAL, pi);
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                    SystemClock.elapsedRealtime(), POLL_INTERVAL_MS, pi);
 
         } else {
             alarmManager.cancel(pi);
             pi.cancel();
         }
+
+        QueryPreferences.setAlarmOn(context, isOn);
     }
 
     public static boolean isServiceAlarmOn(Context context) {
         Intent i = PollService.newIntent(context);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
+        PendingIntent pi = PendingIntent
+                .getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         return pi != null;
     }
 
@@ -92,11 +107,17 @@ public class PollService extends IntentService {
                     .setAutoCancel(true)
                     .build();
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(0, notification);
         }
 
         QueryPreferences.setLastResultId(this, resultId);
+    }
+
+    private void showBackgroundNotification(int requestCode, Notification notification) {
+        Intent i = new Intent(ACTION_SHOW_NOTIFICATION);
+        i.putExtra(REQUEST_CODE, requestCode);
+        i.putExtra(NOTIFICATION, notification);
+        sendOrderedBroadcast(i, PERM_PRIVATE, null, null,
+                Activity.RESULT_OK, null, null);
     }
 
     private boolean isNetworkAvailableAndConnected() {
