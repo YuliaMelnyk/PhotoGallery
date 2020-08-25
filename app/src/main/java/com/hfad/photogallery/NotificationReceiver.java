@@ -1,6 +1,4 @@
-package
-        com.hfad.photogallery;
-
+package com.hfad.photogallery;
 import android.app.Activity;
 import android.app.Notification;
 import android.content.BroadcastReceiver;
